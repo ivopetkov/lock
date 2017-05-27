@@ -77,6 +77,65 @@ class Lock
      * 
      * @param mixed $key
      * @throws \Exception
+     * @return boolean
+     */
+    static public function exists($key)
+    {
+        $keyMD5 = md5(serialize($key));
+        if (isset(self::$data[$keyMD5])) {
+            return true;
+        }
+
+        $exists = function() use ($keyMD5) {
+            $filename = sys_get_temp_dir() . '/ivopetkovlocks/' . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
+            if (!is_file($filename)) {
+                return false;
+            }
+            try {
+                $filePointer = fopen($filename, "w");
+            } catch (Exception $e) {
+                $filePointer = false;
+            }
+            if ($filePointer === false) {
+                return null;
+            }
+            try {
+                $wouldBlock = null;
+                $flockResult = flock($filePointer, LOCK_EX | LOCK_NB, $wouldBlock);
+            } catch (Exception $e) {
+                $flockResult = null;
+            }
+            if ($flockResult === true) {
+                return false;
+            } elseif ($flockResult === false) {
+                if ($wouldBlock === 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return null;
+        };
+
+        for ($i = 0; $i < self::RETRIES_COUNT; $i++) {
+            $existsResult = $exists();
+            if ($existsResult === true) {
+                return true;
+            } elseif ($existsResult === false) {
+                return false;
+            }
+            if ($i < self::RETRIES_COUNT - 1) {
+                usleep(self::RETRY_DELAY_IN_MICROSECONDS);
+            }
+        }
+
+        throw new \Exception('Cannot check if lock exists (' . $key . ')');
+    }
+
+    /**
+     * 
+     * @param mixed $key
+     * @throws \Exception
      */
     static public function release($key)
     {

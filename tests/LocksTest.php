@@ -42,4 +42,16 @@ class LocksTest extends LocksTestCase
         Lock::release('test1');
     }
 
+    /**
+     * 
+     */
+    public function testExists()
+    {
+        $this->assertTrue(Lock::exists('test1') === false);
+        Lock::acquire('test1');
+        $this->assertTrue(Lock::exists('test1') === true);
+        Lock::release('test1');
+        $this->assertTrue(Lock::exists('test1') === false);
+    }
+
 }
