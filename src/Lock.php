@@ -16,6 +16,26 @@ class Lock
     const RETRY_DELAY_IN_MICROSECONDS = 500000;
 
     static private $data = [];
+    static private $dir = null;
+
+    /**
+     * 
+     * @return string
+     */
+    static function getLocksDir()
+    {
+        return self::$dir === null ? sys_get_temp_dir() . '/ivopetkovlocks/' : self::$dir;
+    }
+
+    /**
+     * 
+     * @param string $dir
+     * @return string
+     */
+    static function setLocksDir($dir)
+    {
+        return self::$dir = rtrim($dir, '\//') . '/';
+    }
 
     /**
      * 
@@ -30,7 +50,7 @@ class Lock
         }
         $lock = function() use ($keyMD5) {
             if (!isset(self::$data[$keyMD5])) {
-                $filename = sys_get_temp_dir() . '/ivopetkovlocks/' . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
+                $filename = self::getLocksDir() . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
                 $pathinfo = pathinfo($filename);
                 if (!is_dir($pathinfo['dirname'])) {
                     mkdir($pathinfo['dirname'], 0777, true); // todo check permissions
@@ -87,7 +107,7 @@ class Lock
         }
 
         $exists = function() use ($keyMD5) {
-            $filename = sys_get_temp_dir() . '/ivopetkovlocks/' . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
+            $filename = self::getLocksDir() . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
             if (!is_file($filename)) {
                 return false;
             }
