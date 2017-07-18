@@ -50,10 +50,16 @@ class Lock
         }
         $lock = function() use ($keyMD5) {
             if (!isset(self::$data[$keyMD5])) {
-                $filename = self::getLocksDir() . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
-                $pathinfo = pathinfo($filename);
-                if (!is_dir($pathinfo['dirname'])) {
-                    mkdir($pathinfo['dirname'], 0777, true); // todo check permissions
+                $filename = self::getLocksDir() . $keyMD5 . '.lock';
+                $dir = pathinfo($filename, PATHINFO_DIRNAME);
+                if (!is_dir($dir)) {
+                    try {
+                        mkdir($dir, 0777, true);
+                    } catch (\Exception $e) {
+                        if ($e->getMessage() !== 'mkdir(): File exists') { // The directory may be just created in other process.
+                            throw $e;
+                        }
+                    }
                 }
                 try {
                     $filePointer = fopen($filename, "w");
@@ -107,7 +113,7 @@ class Lock
         }
 
         $exists = function() use ($keyMD5) {
-            $filename = self::getLocksDir() . substr($keyMD5, 0, 2) . '/' . substr($keyMD5, 2, 2) . '/' . substr($keyMD5, 4);
+            $filename = self::getLocksDir() . $keyMD5 . '.lock';
             if (!is_file($filename)) {
                 return false;
             }
@@ -167,6 +173,12 @@ class Lock
             try {
                 flock(self::$data[$keyMD5], LOCK_UN);
                 $fcloseResult = fclose(self::$data[$keyMD5]);
+                $filename = self::getLocksDir() . $keyMD5 . '.lock';
+                $tempFilename = $filename . '.' . md5(uniqid() . rand(0, 999999));
+                $renameResult = @rename($filename, $tempFilename);
+                if ($renameResult) {
+                    unlink($tempFilename);
+                }
             } catch (Exception $e) {
                 
             }
