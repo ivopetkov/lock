@@ -50,8 +50,7 @@ class Lock
         }
         $lock = function() use ($keyMD5) {
             if (!isset(self::$data[$keyMD5])) {
-                $filename = self::getLocksDir() . $keyMD5 . '.lock';
-                $dir = pathinfo($filename, PATHINFO_DIRNAME);
+                $dir = self::getLocksDir();
                 if (!is_dir($dir)) {
                     try {
                         mkdir($dir, 0777, true);
@@ -61,6 +60,7 @@ class Lock
                         }
                     }
                 }
+                $filename = $dir . $keyMD5 . '.lock';
                 try {
                     $filePointer = fopen($filename, "w");
                 } catch (Exception $e) {
