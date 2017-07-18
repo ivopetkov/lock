@@ -18,7 +18,7 @@ class LocksTest extends LocksTestCase
     /**
      * 
      */
-    public function testacquire()
+    public function testAcquire()
     {
         Lock::acquire('test1');
         Lock::release('test1');

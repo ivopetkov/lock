@@ -12,9 +12,6 @@ namespace IvoPetkov;
 class Lock
 {
 
-    const RETRIES_COUNT = 3;
-    const RETRY_DELAY_IN_MICROSECONDS = 500000;
-
     static private $data = [];
     static private $dir = null;
 
@@ -40,21 +37,22 @@ class Lock
     /**
      * 
      * @param mixed $key
+     * @param array $options
      * @throws \Exception
      */
-    static public function acquire($key)
+    static public function acquire($key, $options = [])
     {
         $keyMD5 = md5(serialize($key));
-        if (isset(self::$data[$keyMD5])) {
-            throw new \Exception('A lock called ' . $key . ' is already acquired!');
-        }
+        $timeout = isset($options['timeout']) ? (float) $options['timeout'] : 1.5;
+        $retryInterval = 0.5;
+        $maxRetriesCount = floor($timeout / $retryInterval);
         $lock = function() use ($keyMD5) {
             if (!isset(self::$data[$keyMD5])) {
                 $dir = self::getLocksDir();
                 if (!is_dir($dir)) {
                     try {
                         mkdir($dir, 0777, true);
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         if ($e->getMessage() !== 'mkdir(): File exists') { // The directory may be just created in other process.
                             throw $e;
                         }
@@ -62,19 +60,14 @@ class Lock
                 }
                 $filename = $dir . $keyMD5 . '.lock';
                 try {
-                    $filePointer = fopen($filename, "w");
-                } catch (Exception $e) {
-                    $filePointer = false;
-                }
-                if ($filePointer === false) {
-                    return false;
-                }
-                try {
-                    $flockResult = flock($filePointer, LOCK_EX | LOCK_NB);
-                } catch (Exception $e) {
-                    $flockResult = false;
-                }
-                if ($flockResult === false) {
+                    $filePointer = @fopen($filename, "w");
+                    if ($filePointer === false) {
+                        return false;
+                    }
+                    if (@flock($filePointer, LOCK_EX | LOCK_NB) === false) {
+                        return false;
+                    }
+                } catch (\Throwable $e) {
                     return false;
                 }
                 self::$data[$keyMD5] = $filePointer;
@@ -82,21 +75,17 @@ class Lock
             }
             return false;
         };
-
-        $isOk = false;
-        for ($i = 0; $i < self::RETRIES_COUNT; $i++) {
+        $startTime = microtime(true);
+        for ($i = 0; $i < $maxRetriesCount + 1; $i++) {
             if ($lock()) {
-                $isOk = true;
+                return;
+            }
+            if (microtime(true) - $startTime > $timeout) {
                 break;
             }
-            if ($i < self::RETRIES_COUNT - 1) {
-                usleep(self::RETRY_DELAY_IN_MICROSECONDS);
-            }
+            usleep($retryInterval * 1000000);
         }
-
-        if (!$isOk) {
-            throw new \Exception('Cannot acquire lock for ' . $key);
-        }
+        throw new \Exception('Cannot acquire lock for "' . $key . '"');
     }
 
     /**
@@ -108,54 +97,21 @@ class Lock
     static public function exists($key)
     {
         $keyMD5 = md5(serialize($key));
-        if (isset(self::$data[$keyMD5])) {
-            return true;
-        }
-
-        $exists = function() use ($keyMD5) {
-            $filename = self::getLocksDir() . $keyMD5 . '.lock';
-            if (!is_file($filename)) {
-                return false;
-            }
-            try {
-                $filePointer = fopen($filename, "w");
-            } catch (Exception $e) {
-                $filePointer = false;
-            }
-            if ($filePointer === false) {
-                return null;
-            }
-            try {
+        $filename = self::getLocksDir() . $keyMD5 . '.lock';
+        try {
+            $filePointer = @fopen($filename, "w");
+            if ($filePointer !== false) {
                 $wouldBlock = null;
-                $flockResult = flock($filePointer, LOCK_EX | LOCK_NB, $wouldBlock);
-            } catch (Exception $e) {
-                $flockResult = null;
-            }
-            if ($flockResult === true) {
-                return false;
-            } elseif ($flockResult === false) {
-                if ($wouldBlock === 1) {
-                    return true;
-                } else {
+                if (@flock($filePointer, LOCK_EX | LOCK_NB, $wouldBlock)) {
                     return false;
+                } else {
+                    return $wouldBlock === 1;
                 }
             }
-            return null;
-        };
-
-        for ($i = 0; $i < self::RETRIES_COUNT; $i++) {
-            $existsResult = $exists();
-            if ($existsResult === true) {
-                return true;
-            } elseif ($existsResult === false) {
-                return false;
-            }
-            if ($i < self::RETRIES_COUNT - 1) {
-                usleep(self::RETRY_DELAY_IN_MICROSECONDS);
-            }
+        } catch (\Throwable $e) {
+            
         }
-
-        throw new \Exception('Cannot check if lock exists (' . $key . ')');
+        throw new \Exception('Cannot check if lock named "' . $key . '" exists.');
     }
 
     /**
@@ -167,38 +123,24 @@ class Lock
     {
         $keyMD5 = md5(serialize($key));
         if (!isset(self::$data[$keyMD5])) {
-            throw new \Exception('A lock called ' . $key . ' does not exists!');
+            throw new \Exception('A lock name "' . $key . '" does not exists in current process!');
+            return;
         }
-        $unlock = function() use ($keyMD5) {
-            try {
-                flock(self::$data[$keyMD5], LOCK_UN);
-                $fcloseResult = fclose(self::$data[$keyMD5]);
+        try {
+            if (@flock(self::$data[$keyMD5], LOCK_UN) && @fclose(self::$data[$keyMD5])) {
                 $filename = self::getLocksDir() . $keyMD5 . '.lock';
                 $tempFilename = $filename . '.' . md5(uniqid() . rand(0, 999999));
                 $renameResult = @rename($filename, $tempFilename);
                 if ($renameResult) {
-                    unlink($tempFilename);
+                    @unlink($tempFilename);
                 }
-            } catch (Exception $e) {
-                
+                unset(self::$data[$keyMD5]);
+                return;
             }
-            unset(self::$data[$keyMD5]);
-            return $fcloseResult;
-        };
-
-        $isOk = false;
-        for ($i = 0; $i < self::RETRIES_COUNT; $i++) {
-            if ($unlock()) {
-                $isOk = true;
-                break;
-            }
-            if ($i < self::RETRIES_COUNT - 1) {
-                usleep(self::RETRY_DELAY_IN_MICROSECONDS);
-            }
+        } catch (\Throwable $e) {
+            throw new \Exception('Cannot release the lock named "' . $key . '". Reason: ' . $e->getMessage());
         }
-        if (!$isOk) {
-            throw new \Exception('Cannot release lock for ' . $key);
-        }
+        throw new \Exception('Cannot release the lock named "' . $key . '"');
     }
 
 }
