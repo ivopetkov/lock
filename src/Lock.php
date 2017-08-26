@@ -66,7 +66,7 @@ class Lock
                 if (!is_dir($dir)) {
                     try {
                         mkdir($dir, 0777, true);
-                    } catch (\Throwable $e) {
+                    } catch (\Exception $e) {
                         if ($e->getMessage() !== 'mkdir(): File exists') { // The directory may be just created in other process.
                             restore_error_handler();
                             return false;
@@ -81,7 +81,7 @@ class Lock
                         restore_error_handler();
                         return true;
                     }
-                } catch (\Throwable $e) {
+                } catch (\Exception $e) {
                     
                 }
                 restore_error_handler();
@@ -127,7 +127,7 @@ class Lock
                     return $wouldBlock === 1;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             
         }
         restore_error_handler();
@@ -158,14 +158,14 @@ class Lock
                     if ($renameResult) {
                         unlink($tempFilename);
                     }
-                } catch (\Throwable $e) {
+                } catch (\Exception $e) {
                     // Don't care whether the rename is successful
                 }
                 unset(self::$data[$keyMD5]);
                 restore_error_handler();
                 return;
             }
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             restore_error_handler();
             throw new \Exception('Cannot release the lock named "' . $key . '". Reason: ' . $e->getMessage());
         }
