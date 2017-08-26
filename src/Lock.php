@@ -151,11 +151,15 @@ class Lock
         });
         try {
             if (flock(self::$data[$keyMD5], LOCK_UN) && fclose(self::$data[$keyMD5])) {
-                $filename = self::getLocksDir() . $keyMD5 . '.lock';
-                $tempFilename = $filename . '.' . md5(uniqid() . rand(0, 999999));
-                $renameResult = rename($filename, $tempFilename);
-                if ($renameResult) {
-                    unlink($tempFilename);
+                try {
+                    $filename = self::getLocksDir() . $keyMD5 . '.lock';
+                    $tempFilename = $filename . '.' . md5(uniqid() . rand(0, 999999));
+                    $renameResult = rename($filename, $tempFilename);
+                    if ($renameResult) {
+                        unlink($tempFilename);
+                    }
+                } catch (\Throwable $e) {
+                    // Don't care whether the rename is successful
                 }
                 unset(self::$data[$keyMD5]);
                 restore_error_handler();
