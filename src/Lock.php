@@ -28,21 +28,28 @@ class Lock
     /**
      * 
      * @param string $dir
-     * @return string
      */
     static function setLocksDir($dir)
     {
-        return self::$dir = rtrim($dir, '\//') . '/';
+        self::$dir = rtrim($dir, '\//') . '/';
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    static function getKeyPrefix()
+    {
+        return self::$keyPrefix;
     }
 
     /**
      * 
      * @param string $prefix
-     * @return string
      */
     static function setKeyPrefix($prefix)
     {
-        return self::$keyPrefix = $prefix;
+        self::$keyPrefix = $prefix;
     }
 
     /**
