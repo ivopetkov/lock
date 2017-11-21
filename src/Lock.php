@@ -15,6 +15,7 @@ class Lock
     static private $data = [];
     static private $dir = null;
     static private $keyPrefix = null;
+    static private $defaultLockTimeout = 1.5;
 
     /**
      * 
@@ -54,6 +55,24 @@ class Lock
 
     /**
      * 
+     * @return string
+     */
+    static function getDefaultLockTimeout()
+    {
+        return self::$defaultLockTimeout;
+    }
+
+    /**
+     * 
+     * @param string $prefix
+     */
+    static function setDefaultLockTimeout($seconds)
+    {
+        self::$defaultLockTimeout = $seconds;
+    }
+
+    /**
+     * 
      * @param mixed $key
      * @param array $options
      * @throws \Exception
@@ -61,7 +80,7 @@ class Lock
     static public function acquire($key, $options = [])
     {
         $keyMD5 = md5(self::$keyPrefix . serialize($key));
-        $timeout = isset($options['timeout']) ? (float) $options['timeout'] : 1.5;
+        $timeout = isset($options['timeout']) ? (float) $options['timeout'] : self::$defaultLockTimeout;
         $retryInterval = 0.5;
         $maxRetriesCount = floor($timeout / $retryInterval);
         $lock = function() use ($keyMD5) {
@@ -118,7 +137,11 @@ class Lock
     static public function exists($key)
     {
         $keyMD5 = md5(self::$keyPrefix . serialize($key));
-        $filename = self::getLocksDir() . $keyMD5 . '.lock';
+        $dir = self::getLocksDir();
+        if (!is_dir($dir)) {
+            return false;
+        }
+        $filename = $dir . $keyMD5 . '.lock';
         set_error_handler(function($errno, $errstr) {
             throw new \Exception($errstr);
         });
@@ -151,6 +174,9 @@ class Lock
         $keyMD5 = md5(self::$keyPrefix . serialize($key));
         if (!isset(self::$data[$keyMD5])) {
             throw new \Exception('A lock name "' . $key . '" does not exists in current process!');
+        }
+        $dir = self::getLocksDir();
+        if (!is_dir($dir)) {
             return;
         }
         set_error_handler(function($errno, $errstr) {
@@ -159,7 +185,7 @@ class Lock
         try {
             if (flock(self::$data[$keyMD5], LOCK_UN) && fclose(self::$data[$keyMD5])) {
                 try {
-                    $filename = self::getLocksDir() . $keyMD5 . '.lock';
+                    $filename = $dir . $keyMD5 . '.lock';
                     $tempFilename = $filename . '.' . md5(uniqid() . rand(0, 999999));
                     $renameResult = rename($filename, $tempFilename);
                     if ($renameResult) {

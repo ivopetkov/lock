@@ -48,6 +48,7 @@ class LocksTest extends LocksTestCase
     public function testKeyPrefix()
     {
         Lock::setKeyPrefix('prefix1');
+        $this->assertTrue(Lock::getKeyPrefix() === 'prefix1');
         $this->assertTrue(Lock::exists('test1') === false);
         Lock::acquire('test1');
         $this->assertTrue(Lock::exists('test1') === true);
@@ -65,6 +66,26 @@ class LocksTest extends LocksTestCase
         $this->assertTrue(Lock::exists('test3') === true);
         Lock::release('test3');
         $this->assertTrue(Lock::exists('test3') === false);
+    }
+
+    /**
+     * 
+     */
+    public function testTimeout()
+    {
+        Lock::setDefaultLockTimeout(2.5);
+        $this->assertTrue(Lock::getDefaultLockTimeout() === 2.5);
+        Lock::acquire('test2');
+        try {
+            $time = microtime(true);
+            Lock::acquire('test2');
+            throw new Exception('Should not get here');
+        } catch (Exception $e) {
+            $time = microtime(true) - $time;
+            $this->assertTrue($e->getMessage() === 'Cannot acquire lock for "test2"');
+            $this->assertTrue($time > 2.5);
+            $this->assertTrue($time < 3);
+        }
     }
 
     /**
