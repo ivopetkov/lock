@@ -15,7 +15,7 @@ class Lock
     static private $data = [];
     static private $dir = null;
     static private $keyPrefix = null;
-    static private $defaultLockTimeout = 1.5;
+    static private $defaultLockTimeout = 30;
 
     /**
      * 
