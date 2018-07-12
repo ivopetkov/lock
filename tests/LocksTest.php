@@ -12,8 +12,15 @@ use IvoPetkov\Lock;
 /**
  * @runTestsInSeparateProcesses
  */
-class LocksTest extends LocksTestCase
+class LocksTest extends PHPUnit\Framework\TestCase
 {
+
+    function setUp()
+    {
+        $dir = sys_get_temp_dir() . '/lock-unit-tests/' . uniqid() . '/';
+        mkdir($dir, 0777, true);
+        IvoPetkov\Lock::setLocksDir($dir);
+    }
 
     /**
      * 
@@ -25,7 +32,7 @@ class LocksTest extends LocksTestCase
         Lock::acquire('test1');
         Lock::release('test1');
         Lock::acquire('test1');
-        $this->setExpectedException('\Exception');
+        $this->expectException('\Exception');
         Lock::acquire('test1');
     }
 
@@ -38,7 +45,7 @@ class LocksTest extends LocksTestCase
         Lock::release('test2');
         Lock::acquire('test2');
         Lock::release('test2');
-        $this->setExpectedException('\Exception');
+        $this->expectException('\Exception');
         Lock::release('test2');
     }
 
