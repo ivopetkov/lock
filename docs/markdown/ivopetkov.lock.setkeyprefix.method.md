@@ -1,5 +1,7 @@
 # IvoPetkov\Lock::setKeyPrefix
 
+Sets a new key prefix.
+
 ```php
 static public void setKeyPrefix ( string $prefix )
 ```
@@ -8,13 +10,15 @@ static public void setKeyPrefix ( string $prefix )
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`$prefix`
 
-## Returns
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No value is returned.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The new key prefix.
 
 ## Details
 
 Class: [IvoPetkov\Lock](ivopetkov.lock.class.md)
 
 File: /src/Lock.php
+
+---
+
+[back to index](index.md)
 

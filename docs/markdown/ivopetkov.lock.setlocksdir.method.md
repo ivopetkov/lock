@@ -1,5 +1,7 @@
 # IvoPetkov\Lock::setLocksDir
 
+Sets a new locks dir.
+
 ```php
 static public void setLocksDir ( string $dir )
 ```
@@ -8,13 +10,15 @@ static public void setLocksDir ( string $dir )
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`$dir`
 
-## Returns
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No value is returned.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The new locks dir.
 
 ## Details
 
 Class: [IvoPetkov\Lock](ivopetkov.lock.class.md)
 
 File: /src/Lock.php
+
+---
+
+[back to index](index.md)
 

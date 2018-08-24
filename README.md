@@ -38,9 +38,7 @@ Lock::release('lock1'); // Releases the acquired lock.
 
 ## Documentation
 
-List of classes added by the library:
-
-- [IvoPetkov\Lock](https://github.com/ivopetkov/lock/blob/master/docs/classes/IvoPetkov-Lock.md)
+Full [documentation](https://github.com/ivopetkov/lock/blob/master/docs/markdown/index.md) is avaiable as part of this repository.
 
 ## Configuration
 
@@ -66,8 +64,7 @@ Lock::setKeyPrefix('app1');
 This project is licensed under the MIT License. See the [license file](https://github.com/ivopetkov/lock/blob/master/LICENSE) for more information.
 
 ## Contributing
-Feel free to open new issues and contribute to the project. Let's make it awesome.
-This project is released with a [Contributor Covenant Code of Conduct](https://github.com/ivopetkov/lock/blob/master/CODE-OF-CONDUCT.md). By participating in this project you agree to abide by its terms.
+Feel free to open new issues and contribute to the project. Let's make it awesome and let's do in a positive way.
 
-## Authors
-This library is created and maintained by [Ivo Petkov](https://github.com/ivopetkov/) ([ivopetkov.com](https://ivopetkov.com)) and some [awesome folks](https://github.com/ivopetkov/lock/graphs/contributors).
+## Author
+This library is created and maintained by [Ivo Petkov](https://github.com/ivopetkov/) ([ivopetkov.com](https://ivopetkov.com)).

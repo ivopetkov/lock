@@ -9,72 +9,83 @@
 
 namespace IvoPetkov;
 
+/**
+ * A class that provides locking functionality.
+ */
 class Lock
 {
 
     static private $data = [];
     static private $dir = null;
-    static private $keyPrefix = null;
+    static private $keyPrefix = '';
     static private $defaultLockTimeout = 30;
 
     /**
+     * Returns the current locks dir.
      * 
-     * @return string
+     * @return string The current locks dir.
      */
-    static function getLocksDir()
+    static function getLocksDir(): string
     {
         return self::$dir === null ? sys_get_temp_dir() . '/ivopetkovlocks/' : self::$dir;
     }
 
     /**
+     * Sets a new locks dir.
      * 
-     * @param string $dir
+     * @param string $dir The new locks dir.
      */
-    static function setLocksDir($dir)
+    static function setLocksDir(string $dir)
     {
         self::$dir = rtrim($dir, '\//') . '/';
     }
 
     /**
+     * Returns the current key prefix.
      * 
      * @return string
      */
-    static function getKeyPrefix()
+    static function getKeyPrefix(): string
     {
         return self::$keyPrefix;
     }
 
     /**
+     * Sets a new key prefix.
      * 
-     * @param string $prefix
+     * @param string $prefix The new key prefix.
      */
-    static function setKeyPrefix($prefix)
+    static function setKeyPrefix(string $prefix)
     {
         self::$keyPrefix = $prefix;
     }
 
     /**
+     * Returns the default lock timeout.
      * 
-     * @return string
+     * @return float The default lock timeout.
      */
-    static function getDefaultLockTimeout()
+    static function getDefaultLockTimeout(): float
     {
         return self::$defaultLockTimeout;
     }
 
     /**
+     * Sets a new default lock timeout.
      * 
-     * @param string $prefix
+     * @param float $seconds The new default lock timeout.
      */
-    static function setDefaultLockTimeout($seconds)
+    static function setDefaultLockTimeout(float $seconds)
     {
         self::$defaultLockTimeout = $seconds;
     }
 
     /**
+     * Acquires a new lock for the key specified.
      * 
-     * @param mixed $key
-     * @param array $options
+     * @param mixed $key The key of the lock.
+     * @param array $options Lock options. Available values:
+     * - timeout - A time (in seconds) to retry acquiring the lock.
      * @throws \Exception
      */
     static public function acquire($key, $options = [])
@@ -129,10 +140,11 @@ class Lock
     }
 
     /**
+     * Checks if a lock exists.
      * 
-     * @param mixed $key
+     * @param mixed $key The key of the lock.
      * @throws \Exception
-     * @return boolean
+     * @return boolean Returns TRUE if the lock exists, FALSE otherwise.
      */
     static public function exists($key)
     {
@@ -165,8 +177,9 @@ class Lock
     }
 
     /**
+     * Releases a lock.
      * 
-     * @param mixed $key
+     * @param mixed $key The key of the lock.
      * @throws \Exception
      */
     static public function release($key)
