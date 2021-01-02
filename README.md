@@ -38,7 +38,7 @@ Lock::release('lock1'); // Releases the acquired lock.
 
 ## Documentation
 
-Full [documentation](https://github.com/ivopetkov/lock/blob/master/docs/markdown/index.md) is avaliable as part of this repository.
+Full [documentation](https://github.com/ivopetkov/lock/blob/master/docs/markdown/index.md) is available as part of this repository.
 
 ## Configuration
 
