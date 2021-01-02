@@ -15,7 +15,7 @@ use IvoPetkov\Lock;
 class LocksTest extends PHPUnit\Framework\TestCase
 {
 
-    function setUp()
+    function setUp(): void
     {
         $dir = sys_get_temp_dir() . '/lock-unit-tests/' . uniqid() . '/';
         mkdir($dir, 0777, true);
@@ -126,5 +126,4 @@ class LocksTest extends PHPUnit\Framework\TestCase
             $this->assertTrue($e->getMessage() === 'Cannot check if lock named "test5" exists.');
         }
     }
-
 }
