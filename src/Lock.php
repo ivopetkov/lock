@@ -94,9 +94,9 @@ class Lock
         $timeout = isset($options['timeout']) ? (float) $options['timeout'] : self::$defaultLockTimeout;
         $retryInterval = 0.5;
         $maxRetriesCount = floor($timeout / $retryInterval);
-        $lock = function() use ($keyMD5) {
+        $lock = function () use ($keyMD5) {
             if (!isset(self::$data[$keyMD5])) {
-                set_error_handler(function($errno, $errstr) {
+                set_error_handler(function ($errno, $errstr) {
                     throw new \Exception($errstr);
                 });
                 $dir = self::getLocksDir();
@@ -119,7 +119,6 @@ class Lock
                         return true;
                     }
                 } catch (\Exception $e) {
-                    
                 }
                 restore_error_handler();
                 return false;
@@ -154,7 +153,7 @@ class Lock
             return false;
         }
         $filename = $dir . $keyMD5 . '.lock';
-        set_error_handler(function($errno, $errstr) {
+        set_error_handler(function ($errno, $errstr) {
             throw new \Exception($errstr);
         });
         try {
@@ -170,7 +169,6 @@ class Lock
                 }
             }
         } catch (\Exception $e) {
-            
         }
         restore_error_handler();
         throw new \Exception('Cannot check if lock named "' . $key . '" exists.');
@@ -192,7 +190,7 @@ class Lock
         if (!is_dir($dir)) {
             return;
         }
-        set_error_handler(function($errno, $errstr) {
+        set_error_handler(function ($errno, $errstr) {
             throw new \Exception($errstr);
         });
         try {
@@ -218,5 +216,4 @@ class Lock
         restore_error_handler();
         throw new \Exception('Cannot release the lock named "' . $key . '"');
     }
-
 }
