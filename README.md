@@ -3,11 +3,8 @@
 A simple locking library
 ... that is based on file locking (and that's awesome).
 
-[![Build Status](https://travis-ci.org/ivopetkov/lock.svg)](https://travis-ci.org/ivopetkov/lock)
 [![Latest Stable Version](https://poser.pugx.org/ivopetkov/lock/v/stable)](https://packagist.org/packages/ivopetkov/lock)
-[![codecov.io](https://codecov.io/github/ivopetkov/lock/coverage.svg?branch=master)](https://codecov.io/github/ivopetkov/lock?branch=master)
 [![License](https://poser.pugx.org/ivopetkov/lock/license)](https://packagist.org/packages/ivopetkov/lock)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dafa5722288b409a9d447fa6aabd572b)](https://www.codacy.com/app/ivo_2/lock)
 
 ## Why you need it
 
