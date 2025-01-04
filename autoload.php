@@ -11,7 +11,7 @@ $classes = array(
     'IvoPetkov\Lock' => 'src/Lock.php'
 );
 
-spl_autoload_register(function ($class) use ($classes) {
+spl_autoload_register(function ($class) use ($classes): void {
     if (isset($classes[$class])) {
         require __DIR__ . '/' . $classes[$class];
     }

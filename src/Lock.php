@@ -96,7 +96,7 @@ class Lock
         $maxRetriesCount = floor($timeout / $retryInterval);
         $lock = function () use ($keyMD5) {
             if (!isset(self::$data[$keyMD5])) {
-                set_error_handler(function ($errno, $errstr) {
+                set_error_handler(function ($errno, $errstr): void {
                     throw new \Exception($errstr);
                 });
                 $dir = self::getLocksDir();
@@ -153,7 +153,7 @@ class Lock
             return false;
         }
         $filename = $dir . $keyMD5 . '.lock';
-        set_error_handler(function ($errno, $errstr) {
+        set_error_handler(function ($errno, $errstr): void {
             throw new \Exception($errstr);
         });
         try {
@@ -190,7 +190,7 @@ class Lock
         if (!is_dir($dir)) {
             return;
         }
-        set_error_handler(function ($errno, $errstr) {
+        set_error_handler(function ($errno, $errstr): void {
             throw new \Exception($errstr);
         });
         try {
